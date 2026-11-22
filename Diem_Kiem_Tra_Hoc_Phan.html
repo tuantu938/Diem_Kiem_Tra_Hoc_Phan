@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quản lý &amp; Tính điểm Học phần</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#141b2d;--mut:#5b6478;--line:#e1e6ef;--brand:#3b4cca;--soft:#eceffd;--gg:#dcfce7;--gg-t:#14532d;--gb:#dbeafe;--gb-t:#1e3a8a;--gy:#fef3c7;--gy-t:#78350f;--gr:#fee2e2;--gr-t:#7f1d1d}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 'Be Vietnam Pro',Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+button,input,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 24px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:18px;font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{width:250px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#f8fafc}
+input:focus,textarea:focus{outline:2px solid #c7d2fe}
+.btn{padding:9px 14px;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{background:#f8fafc}
+.btn-p{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.btn-p:hover{background:#2f3da8}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn-d{color:#b91c1c}
+.on{background:var(--soft)!important;border-color:var(--brand)!important;color:var(--brand)!important}
+main{max-width:1440px;margin:0 auto;padding:20px 24px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(20,27,45,.05),0 4px 14px rgba(20,27,45,.05)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.stat{padding:16px 18px}
+.lb{font-size:13px;font-weight:600;color:var(--mut)}
+.vl{font-size:28px;font-weight:700;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.sb{font-size:12px;color:var(--mut)}
+.scale{margin-top:14px;padding:12px 18px}
+.scale summary{cursor:pointer;font-weight:600;color:var(--brand)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 8px}
+.chip{padding:6px 10px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);font-size:12px}
+.mut{color:var(--mut);font-size:13px}
+.sem{margin-top:18px;overflow:hidden}
+.sh{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);background:#fafbfd}
+.sh input{font-weight:700;font-size:15px;min-width:300px;border:1px solid transparent;border-radius:8px;padding:6px 8px;background:transparent}
+.sh input:hover{border-color:var(--line);background:#fff}
+.sem.closed .body{display:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1320px;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center;white-space:nowrap}
+th{background:#f8fafc;color:#3f4a60;font-weight:600;font-size:12px}
+td input{width:100%;min-width:50px;padding:6px 4px;border:1px solid transparent;border-radius:6px;background:transparent;text-align:center}
+td input:hover{border-color:var(--line)}
+td input:focus{border-color:var(--brand);background:var(--soft)}
+td.nm{text-align:left;width:280px}
+td.nm input.t{width:calc(100% - 22px);min-width:230px;text-align:left}
+td.nm label{display:inline-flex;align-items:center;margin-left:6px;cursor:pointer;vertical-align:middle}
+td.nm input[type=checkbox]{width:16px;min-width:0;padding:0;margin:0}
+tr.off td{color:#8a93a6}
+[data-o]{font-variant-numeric:tabular-nums}
+[data-o=tk],[data-o=tbhk],[data-o=thi]{font-weight:600}
+.badge{display:inline-block;min-width:40px;padding:3px 9px;border-radius:999px;font-weight:700;font-size:12px}
+.gg{background:var(--gg);color:var(--gg-t)}.gb{background:var(--gb);color:var(--gb-t)}.gy{background:var(--gy);color:var(--gy-t)}.gr{background:var(--gr);color:var(--gr-t)}.gn{background:#f1f5f9;color:var(--mut)}
+.foot{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:center;padding:14px 18px;background:#fafbfd;border-top:1px solid var(--line)}
+.kv{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13px}
+.kv b{color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums}
+.kv input{width:84px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;text-align:center}
+.add{padding:12px 18px}
+.empty{padding:48px;text-align:center;color:var(--mut)}
+.modal{position:fixed;inset:0;background:rgba(20,27,45,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.box{background:#fff;border-radius:16px;width:min(880px,100%);max-height:92vh;overflow:auto;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.mh h3{margin:0;font-size:17px}
+.fl{display:block;font-weight:600;font-size:13px;margin-bottom:14px}
+.fl input{display:block;width:100%;margin-top:6px;padding:9px 12px;border:1px solid var(--line);border-radius:10px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.mr{display:grid;grid-template-columns:120px 1fr 66px 74px 84px 36px;gap:6px;align-items:center;margin-bottom:6px}
+.mr input{padding:7px 9px;border:1px solid var(--line);border-radius:8px;min-width:0}
+.mr input[type=checkbox]{justify-self:center;width:16px;height:16px;padding:0}
+.mr.hd{font-size:12px;font-weight:600;color:var(--mut)}
+textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.pv{min-width:0;margin-top:12px;font-size:13px}
+.pv th,.pv td{padding:6px 8px}
+.pv tr.dup td{background:#fef2f2;color:#991b1b}
+.mr input.dup{border-color:#dc2626;background:#fef2f2}
+.warn,.note{border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
+.warn{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.note{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+.svc{padding:16px 20px;margin-bottom:18px}
+.svg{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;align-items:start}
+.svc-col{display:grid;grid-template-columns:170px 1fr;gap:4px 16px;align-items:center}
+.svg span{color:var(--mut);font-size:13px}
+.svg input,.svg select{width:100%;min-width:0;padding:7px 10px;border:1px solid transparent;border-radius:8px;background:transparent;font-weight:600}
+.svg input:hover,.svg select:hover{border-color:var(--line);background:#fff}
+.pvh{margin:14px 0 4px;font-weight:600;color:var(--brand)}
+.mf{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+@media (max-width:640px){.search{width:100%}header{padding:12px 14px}main{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Hệ thống Quản lý &amp; Tính điểm Học phần</h1>
+  <div class="bar">
+    <input id="q" class="search" type="search" placeholder="Tìm theo mã hoặc tên môn...">
+    <button class="btn btn-p" data-act="openM">+ Thêm Học Kỳ Mới</button>
+    <button class="btn" data-act="imp">Nhập Excel</button>
+    <button class="btn" data-act="exp">Xuất Excel</button>
+    <button class="btn" data-act="sample">Tải dữ liệu mẫu</button>
+    <input id="file" type="file" accept=".xlsx,.xls" hidden>
+  </div>
+</header>
+
+<main>
+  <section class="card svc"><div class="svg" id="svg"></div></section>
+  <section class="stats">
+    <div class="card stat"><div class="lb">Điểm TB tích lũy (Hệ 10)</div><div class="vl" id="v10">—</div><div class="sb" id="s10"></div></div>
+    <div class="card stat"><div class="lb">Điểm TB tích lũy (Hệ 4)</div><div class="vl" id="v4">—</div><div class="sb" id="r4"></div></div>
+    <div class="card stat"><div class="lb">Tín chỉ tích lũy</div><div class="vl" id="vtl">0</div><div class="sb" id="stl"></div></div>
+  </section>
+
+  <details class="card scale">
+    <summary>Bảng quy đổi thang điểm</summary>
+    <div class="chips">
+      <span class="chip"><b>&lt; 3.0</b> F (0.0) Kém</span>
+      <span class="chip"><b>3.0–3.9</b> D (1.0) Yếu</span>
+      <span class="chip"><b>4.0–4.9</b> D+ (1.5) Trung bình yếu</span>
+      <span class="chip"><b>5.0–5.9</b> C (2.0) Trung bình</span>
+      <span class="chip"><b>6.0–6.9</b> B (3.0) Trung bình khá</span>
+      <span class="chip"><b>7.0–7.9</b> B+ (3.5) Khá</span>
+      <span class="chip"><b>8.0–8.9</b> A (3.7) Giỏi</span>
+      <span class="chip"><b>9.0–10</b> A+ (4.0) Xuất sắc</span>
+    </div>
+    <p class="mut">Xếp loại học lực theo hệ 4: từ 3.60 là Xuất sắc, từ 3.20 là Giỏi, từ 2.50 là Khá, từ 2.00 là Trung bình, từ 1.00 là Yếu, dưới 1.00 là Kém.</p>
+  </details>
+
+  <div id="sems"></div>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="box">
+    <div class="mh"><h3>Thêm học kỳ mới</h3><button class="btn btn-sm" data-act="closeM">✕</button></div>
+    <label class="fl">Tên học kỳ<input id="mName" value="Học kỳ mới"></label>
+    <div class="tabs">
+      <button class="btn btn-sm" data-mode="rows">Nhập từng dòng</button>
+      <button class="btn btn-sm" data-mode="paste">Dán nhanh từ Excel / Văn bản</button>
+    </div>
+    <div id="mWarn"></div>
+    <div id="mRows"></div>
+    <div id="mPaste" hidden>
+      <textarea id="mText" rows="6" placeholder="Mỗi dòng một môn: Mã | Tên môn | Số TC | %KT | (tùy chọn) 0 nếu không tính TBHK&#10;Ví dụ: MAT505 | Toán học 1 | 2 | 50"></textarea>
+      <div id="mPrev"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" data-act="closeM">Hủy</button>
+      <button class="btn btn-p" data-act="mkSem">Tạo Bảng Học Kỳ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const KEY='diemHocPhan.v1';
+const GR=[[9,'A+',4,'gg'],[8,'A',3.7,'gg'],[7,'B+',3.5,'gb'],[6,'B',3,'gb'],[5,'C',2,'gy'],[4,'D+',1.5,'gy'],[3,'D',1,'gr'],[-99,'F',0,'gr']];
+const RANK=[[3.6,'Xuất sắc'],[3.2,'Giỏi'],[2.5,'Khá'],[2,'Trung bình'],[1,'Yếu'],[-99,'Kém']];
+const num=v=>(v===''||v==null||isNaN(+v))?null:+v;
+const r1=x=>Math.round((x+1e-9)*10)/10, r2=x=>Math.round((x+1e-9)*100)/100;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+const norm=s=>String(s??'').trim().toLowerCase().replace(/\s+/g,' ');
+const grade=t=>t==null?null:GR.find(g=>t>=g[0]);
+const rank=x=>x==null?'—':RANK.find(r=>x>=r[0])[1];
+const blank=()=>({code:'',name:'',tc:2,kt:50,cc:null,qt:[null,null,null],ghp:null,chp:null,l2:null,counted:true});
+const M=(code,name,tc,kt,cc,qt,ghp,chp,cnt=1)=>({code,name,tc,kt,cc,qt,ghp,chp,l2:null,counted:cnt!==0});
+const SAMPLE=[
+{name:'Học kỳ I - Năm học 2024 - 2025',rl:100,closed:false,courses:[
+ M('EDU136','Giới thiệu ngành - ĐH GDTH',2,0,10,[8,9,null],7,8.6),
+ M('LAW101','Pháp luật đại cương',2,40,10,[10,10,null],10,7.5),
+ M('MAT505','Toán học 1',2,50,10,[8,9,6],7.8,9),
+ M('PED118','Giáo dục học - ĐH GDTH',3,50,10,[8.3,null,null],8.3,8.5),
+ M('PRE105','Sinh lý học trẻ em lứa tuổi tiểu học',2,50,10,[10,10,null],10,9.3),
+ M('VIE501','Tiếng Việt 1 - GDTH',3,50,10,[7.8,null,null],8,6.2),
+ M('PSY107','Tâm lý học sư phạm cho giáo viên tiểu học',4,50,10,[8.8,null,null],8.8,6.5),
+ M('EDU103','Quản lý hành chính Nhà nước và Quản lý ngành GD&ĐT',2,50,10,[null,null,null],9,8)]},
+{name:'Học kỳ II - Năm học 2024 - 2025',rl:100,closed:false,courses:[
+ M('PHT154','Bóng chuyền 1',3,40,10,[9,null,null],9.3,10,0),
+ M('ENG110','Tiếng Anh 1',4,50,10,[8.5,8.9,10],9.6,9.8,0),
+ M('PHI104','Triết học Mác - Lênin',3,50,10,[8.5,9,null],8.8,6),
+ M('VIE502','Tiếng Việt 2 - GDTH',3,50,10,[7.5,6.5,null],7.6,8),
+ M('LIT505','Văn học 1 - GDTH',3,50,10,[8.5,9,9.5],8.5,8.5),
+ M('PED657','Giáo viên trong thế kỷ XXI - GDTH',2,50,10,[8.5,8.3,null],8.6,8),
+ M('VIE103','Tiếng Việt thực hành',3,50,10,[8.5,9,10],8.8,8),
+ M('ARI502','Toán học 2',2,50,10,[9,8,4],7,8.5)]}
+];
+let S=[],D=[],MODE='rows';
+try{S=JSON.parse(localStorage.getItem(KEY))||structuredClone(SAMPLE)}catch(e){S=structuredClone(SAMPLE)}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const SVF=[['code','Student code'],['name','Student name'],['gender','Gender'],['birth','Place of birth'],['cls','Class'],['major','Major'],['dept','School/Department'],['sys','Training system'],['cohort','Cohort'],['adv','Academic Advisor']];
+let SV={code:'DGT240407',name:'Huỳnh Tuấn Tú',gender:'Male',birth:'An Giang',cls:'DH25GT2( Đại học chính quy - Giáo dục Tiểu học 2 - 2024)',major:'Giáo dục Tiểu học',dept:'Sư phạm',sys:'Đại học chính quy',cohort:'2024-2028',adv:'Nguyễn Phước Tín(1259)'};
+try{SV={...SV,...JSON.parse(localStorage.getItem('diemHocPhan.sv')||'{}')}}catch(e){}
+const saveSV=()=>{try{localStorage.setItem('diemHocPhan.sv',JSON.stringify(SV))}catch(e){}};
+
+function calc(c){
+  const kt=Math.min(100,Math.max(0,num(c.kt)??50)),gh=num(c.ghp),ch=num(c.chp),l2=num(c.l2),tc=num(c.tc)||0;
+  const d=ch==null?null:(l2==null?ch:Math.max(ch,l2));
+  const tk=(d==null||(kt>0&&gh==null))?null:r1((kt>0?gh*kt/100:0)+d*(100-kt)/100);
+  const gr=grade(tk);
+  return {kt,tc,tk,gr,tbhk:c.counted&&tk!=null?r2(tk*tc):null};
+}
+function stats(s){
+  const o={reg:0,tcG:0,sum:0,g4:0,tl:0};
+  s.courses.forEach(c=>{
+    if(!c.counted) return;
+    const k=calc(c); o.reg+=k.tc;
+    if(k.tk==null) return;
+    o.tcG+=k.tc; o.sum+=k.tbhk; o.g4+=k.gr[2]*k.tc; if(k.tk>=4) o.tl+=k.tc;
+  });
+  return o;
+}
+function recalc(){
+  let T=0,C=0,G=0,L=0,R=0;
+  S.forEach((s,si)=>{
+    s.courses.forEach((c,ci)=>{
+      const k=calc(c),tr=$(`tr[data-si="${si}"][data-ci="${ci}"]`);
+      if(!tr) return;
+      tr.classList.toggle('off',!c.counted);
+      tr.querySelector('[data-o=thi]').textContent=100-k.kt;
+      tr.querySelector('[data-o=tk]').textContent=k.tk==null?'—':k.tk.toFixed(1);
+      tr.querySelector('[data-o=gr]').innerHTML=k.gr?`<span class="badge ${k.gr[3]}">${k.gr[1]}</span>`:'<span class="badge gn">—</span>';
+      tr.querySelector('[data-o=tbhk]').textContent=k.tbhk==null?'—':+k.tbhk.toFixed(2);
+    });
+    const o=stats(s),st=$(`.sem[data-si="${si}"]`),avg=o.tcG?r2(o.sum/o.tcG):null,g4=o.tcG?r2(o.g4/o.tcG):null;
+    T+=o.sum;C+=o.tcG;G+=o.g4;L+=o.tl;R+=o.reg;
+    st.querySelector('[data-sum=tc]').textContent=o.reg;
+    st.querySelector('[data-sum=tbhk]').textContent=avg==null?'—':avg.toFixed(2);
+    st.querySelector('[data-sum=g4]').textContent=g4==null?'—':g4.toFixed(2);
+    st.querySelector('[data-sum=rank]').textContent=rank(g4);
+  });
+  const t10=C?r2(T/C):null,t4=C?r2(G/C):null;
+  $('#v10').textContent=t10==null?'—':t10.toFixed(2);
+  $('#v4').textContent=t4==null?'—':t4.toFixed(2);
+  $('#r4').textContent='Xếp hạng: '+rank(t4);
+  $('#vtl').textContent=L;
+  $('#s10').textContent=`Dựa trên ${C} tín chỉ đã có điểm`;
+  $('#stl').textContent=`Tổng tín chỉ đăng ký tính điểm: ${R}`;
+  save();
+}
+function rowHTML(c,si,ci){
+  const N=(f,val,mx=10)=>`<td><input type="number" step="any" min="0" max="${mx}" data-f="${f}" value="${val??''}"></td>`;
+  const q=c.qt||[];
+  return `<tr data-si="${si}" data-ci="${ci}"${c.counted?'':' class="off"'}>
+  <td>${ci+1}</td>
+  <td><input data-f="code" value="${esc(c.code)}" style="min-width:80px"></td>
+  <td class="nm"><input class="t" data-f="name" value="${esc(c.name)}"><label title="Tính vào TBHK (bỏ chọn nếu là môn điều kiện)"><input type="checkbox" data-f="counted"${c.counted?' checked':''}></label></td>
+  ${N('tc',c.tc,30)}${N('kt',c.kt,100)}
+  <td data-o="thi"></td>
+  ${N('cc',c.cc)}${N('qt0',q[0])}${N('qt1',q[1])}${N('qt2',q[2])}${N('qt3',q[3])}${N('qt4',q[4])}
+  ${N('ghp',c.ghp)}${N('chp',c.chp)}${N('l2',c.l2)}
+  <td data-o="tk"></td><td data-o="gr"></td><td data-o="tbhk"></td>
+  <td><button class="btn btn-sm btn-d" data-act="delC" data-si="${si}" data-ci="${ci}" title="Xóa dòng">✕</button></td>
+  </tr>`;
+}
+function semHTML(s,si){
+  return `<section class="card sem${s.closed?' closed':''}" data-si="${si}">
+  <div class="sh">
+    <input data-sf="name" value="${esc(s.name)}" aria-label="Tên học kỳ">
+    <div class="bar">
+      <span class="mut">${s.courses.length} học phần</span>
+      <button class="btn btn-sm" data-act="toggle" data-si="${si}">${s.closed?'Mở rộng':'Thu gọn'}</button>
+      <button class="btn btn-sm btn-d" data-act="delSem" data-si="${si}">Xóa học kỳ</button>
+    </div>
+  </div>
+  <div class="body">
+    <div class="tw"><table>
+      <thead>
+        <tr><th rowspan="2">STT</th><th rowspan="2">Mã môn</th><th rowspan="2">Tên môn</th><th rowspan="2">TC</th><th rowspan="2">%KT</th><th rowspan="2">%Thi</th><th rowspan="2">Điểm chuyên cần</th><th colspan="5">Điểm quá trình</th><th rowspan="2">Điểm GHP</th><th rowspan="2">Điểm CHP</th><th rowspan="2">Thi L2</th><th rowspan="2">Điểm TK<br>(Hệ 10)</th><th rowspan="2">Điểm TK<br>(Chữ)</th><th rowspan="2">TBHKCM</th><th rowspan="2"></th></tr>
+        <tr><th>QT 1</th><th>QT 2</th><th>QT 3</th><th>QT 4</th><th>QT 5</th></tr>
+      </thead>
+      <tbody>${s.courses.map((c,ci)=>rowHTML(c,si,ci)).join('')}</tbody>
+    </table></div>
+    <div class="foot">
+      <div class="kv">Tổng số tín chỉ: <b data-sum="tc">0</b></div>
+      <div class="kv">Điểm rèn luyện: <input type="number" step="any" data-sf="rl" value="${s.rl??''}"></div>
+      <div class="kv">Điểm TBHK (Hệ 10): <b data-sum="tbhk">—</b></div>
+      <div class="kv">Hệ 4: <b data-sum="g4">—</b></div>
+      <div class="kv">Xếp hạng: <b data-sum="rank">—</b></div>
+    </div>
+    <div class="add"><button class="btn btn-sm" data-act="addC" data-si="${si}">+ Thêm học phần</button></div>
+  </div>
+</section>`;
+}
+function render(){
+  $('#sems').innerHTML=S.length?S.map(semHTML).join(''):'<div class="card empty">Chưa có học kỳ nào. Nhấn <b>+ Thêm Học Kỳ Mới</b> hoặc <b>Tải dữ liệu mẫu</b> để bắt đầu.</div>';
+  applyFilter(); recalc();
+}
+function applyFilter(){
+  const q=$('#q').value.trim().toLowerCase();
+  $$('tr[data-si]').forEach(tr=>{
+    const t=(tr.querySelector('[data-f=code]').value+' '+tr.querySelector('[data-f=name]').value).toLowerCase();
+    tr.hidden=!!q&&!t.includes(q);
+  });
+}
+function setField(o,f,el){
+  if(f==='counted') o.counted=el.checked;
+  else if(f==='code'||f==='name') o[f]=el.value;
+  else if(f[0]==='q') (o.qt||(o.qt=[null,null,null]))[+f[2]]=num(el.value);
+  else o[f]=num(el.value);
+}
+function parsePaste(t){
+  return t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>{
+    const p=(l.includes('|')?l.split('|'):l.split('\t')).map(x=>x.trim());
+    if(num(p[2])==null) return null;
+    return {...blank(),code:p[0],name:p[1]||'',tc:num(p[2]),kt:num(p[3])??50,counted:!/^(0|không|khong|x)$/i.test(p[4]||'')};
+  }).filter(Boolean);
+}
+function renderRows(){
+  $('#mRows').innerHTML=`<div class="mr hd"><span>Mã môn</span><span>Tên môn</span><span>TC</span><span>%KT</span><span>Tính TBHK</span><span></span></div>`+
+  D.map((d,i)=>`<div class="mr">
+    <input data-m="code" data-i="${i}" value="${esc(d.code)}" placeholder="EDU136">
+    <input data-m="name" data-i="${i}" value="${esc(d.name)}" placeholder="Tên môn">
+    <input type="number" min="0" step="any" data-m="tc" data-i="${i}" value="${d.tc??''}">
+    <input type="number" min="0" max="100" step="any" data-m="kt" data-i="${i}" value="${d.kt??''}">
+    <input type="checkbox" data-m="counted" data-i="${i}"${d.counted?' checked':''}>
+    <button class="btn btn-sm btn-d" data-act="rmRow" data-i="${i}">✕</button>
+  </div>`).join('')+
+  `<button class="btn btn-sm" data-act="addRow" style="margin-top:8px">+ Thêm dòng</button>`;
+  refresh();
+}
+function renderSV(){
+  $('#svg').innerHTML=[SVF.slice(0,5),SVF.slice(5)].map(col=>`<div class="svc-col">${col.map(([k,l])=>`<span>${l}</span>`+(k==='gender'
+    ?`<select data-sv="gender"><option${SV.gender==='Male'?' selected':''}>Male</option><option${SV.gender==='Female'?' selected':''}>Female</option></select>`
+    :`<input data-sv="${k}" value="${esc(SV[k])}">`)).join('')}</div>`).join('');
+}
+function findDup(list){
+  const hit=new Set(),msg=[];
+  [['code','Mã môn'],['name','Tên môn']].forEach(([f,lb])=>{
+    const m={};
+    list.forEach((c,i)=>{const k=norm(c[f]);if(k){(m[k]=m[k]||[]).push(i)}});
+    Object.values(m).filter(v=>v.length>1).forEach(v=>{
+      v.forEach(i=>hit.add(i));
+      msg.push(`${lb} "${list[v[0]][f]}" lặp ở STT ${v.map(i=>i+1).join(', ')}`);
+    });
+  });
+  return {hit,msg};
+}
+function refresh(){
+  const L=MODE==='rows'?D:parsePaste($('#mText').value);
+  const {hit,msg}=findDup(L);
+  const prev=S.flatMap(s=>s.courses.map(c=>({code:c.code,name:c.name,sem:s.name})));
+  const old=L.filter(c=>norm(c.code)||norm(c.name)).map(c=>{
+    const f=prev.find(p=>(norm(c.code)&&norm(p.code)===norm(c.code))||(norm(c.name)&&norm(p.name)===norm(c.name)));
+    return f?`"${c.code||c.name}" đã có trong ${f.sem}`:null;
+  }).filter(Boolean);
+  $('#mWarn').innerHTML=(msg.length?`<div class="warn"><b>Trùng lặp trong học kỳ mới:</b><br>${msg.map(esc).join('<br>')}</div>`:'')+(old.length?`<div class="note">Đã có ở học kỳ khác, có thể là học lại:<br>${old.map(esc).join('<br>')}</div>`:'');
+  if(MODE==='rows') $$('[data-m=code],[data-m=name]').forEach(el=>el.classList.toggle('dup',hit.has(+el.dataset.i)));
+
+  $('#mPrev').innerHTML=L.length
+    ?`<div class="pvh">Nhận diện ${L.length} học phần</div><table class="pv"><tr><th>Mã môn</th><th>Tên môn</th><th>TC</th><th>%KT</th><th>Tính TBHK</th></tr>${L.map((c,i)=>`<tr class="${hit.has(i)?'dup':''}"><td>${esc(c.code)}</td><td style="text-align:left">${esc(c.name)}</td><td>${c.tc}</td><td>${c.kt}</td><td>${c.counted?'Có':'Không'}</td></tr>`).join('')}</table>`
+    :'<p class="mut">Chưa nhận diện được học phần nào. Mỗi dòng gồm: Mã | Tên môn | Số TC | %KT</p>';
+}
+function setMode(){
+  $$('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===MODE));
+  $('#mRows').hidden=MODE!=='rows'; $('#mPaste').hidden=MODE==='rows';
+  if(MODE==='rows') renderRows(); else refresh();
+}
+function openM(){
+  MODE='rows'; D=[blank(),blank(),blank()];
+  $('#mName').value='Học kỳ mới'; $('#mText').value='';
+  $('#modal').hidden=false; setMode(); $('#mName').focus();
+}
+function closeM(){ $('#modal').hidden=true; }
+function mkSem(){
+  const src=MODE==='rows'?D:parsePaste($('#mText').value);
+  const courses=src.filter(c=>c.code||c.name).map(c=>({...blank(),...c}));
+  if(!courses.length) return alert('Hãy nhập ít nhất một học phần.');
+  if(findDup(courses).msg.length&&!confirm('Học kỳ mới có học phần trùng mã hoặc tên. Vẫn tạo bảng?')) return;
+  S.push({name:$('#mName').value.trim()||'Học kỳ mới',rl:100,closed:false,courses});
+  closeM(); render(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+const focusCell=(si,ci,f)=>{const t=$(`tr[data-si="${si}"][data-ci="${ci}"] [data-f="${f}"]`);if(t){t.focus();t.select?.()}};
+const focusM=(i,f)=>{const t=$(`[data-m="${f}"][data-i="${i}"]`);if(t){t.focus();t.select?.()}};
+function exp(){
+  if(typeof XLSX==='undefined') return alert('Chưa tải được thư viện Excel. Vui lòng kiểm tra kết nối mạng.');
+  const H=['STT','Mã môn','Tên môn','Tính TBHK','TC','%KT','%Thi','Điểm chuyên cần','QT 1','QT 2','QT 3','QT 4','QT 5','Điểm GHP','Điểm CHP','Thi L2','Điểm TK (Hệ 10)','Điểm TK (Chữ)','TBHKCM'];
+  const wb=XLSX.utils.book_new(),used=new Set(['Thông tin SV']);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Thông tin sinh viên','']].concat(SVF.map(([k,l])=>[l,SV[k]??'']))),'Thông tin SV');
+  S.forEach(s=>{
+    const rows=[['Học kỳ',s.name,'Điểm rèn luyện',s.rl??''],[],H];
+    s.courses.forEach((c,ci)=>{
+      const k=calc(c),q=c.qt||[];
+      rows.push([ci+1,c.code,c.name,c.counted?'Có':'Không',c.tc,c.kt,100-k.kt,c.cc,q[0],q[1],q[2],q[3],q[4],c.ghp,c.chp,c.l2,k.tk,k.gr?k.gr[1]:null,k.tbhk]);
+    });
+    const o=stats(s),avg=o.tcG?r2(o.sum/o.tcG):null,g4=o.tcG?r2(o.g4/o.tcG):null;
+    rows.push([],['','Tổng số tín chỉ',o.reg],['','Điểm TBHK (Hệ 10)',avg],['','Điểm TBHK (Hệ 4)',g4],['','Xếp hạng',rank(g4)]);
+    const base=(s.name||'Học kỳ').replace(/[\\\/?*\[\]:]/g,'').trim().slice(0,28)||'Học kỳ';
+    let t=base;for(let i=2;used.has(t);i++)t=`${base} ${i}`;
+    used.add(t);
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),t);
+  });
+  XLSX.writeFile(wb,'bang-diem-hoc-phan.xlsx');
+}
+function parseSem(a){
+  const hi=a.findIndex(r=>r[0]==='STT');
+  if(hi<0) throw 0;
+  const h=a[hi].map(x=>String(x).trim()),V=(r,t)=>{const i=h.indexOf(t);return i<0?'':r[i]};
+  const courses=[];
+  for(const r of a.slice(hi+1)){
+    const code=String(V(r,'Mã môn')).trim(),name=String(V(r,'Tên môn')).trim();
+    if(!code&&!name) break;
+    courses.push({...blank(),code,name,counted:!/^(không|khong|0|false)$/i.test(String(V(r,'Tính TBHK')).trim()),tc:num(V(r,'TC')),kt:num(V(r,'%KT'))??50,cc:num(V(r,'Điểm chuyên cần')),qt:[1,2,3,4,5].map(n=>num(V(r,'QT '+n))),ghp:num(V(r,'Điểm GHP')),chp:num(V(r,'Điểm CHP')),l2:num(V(r,'Thi L2'))});
+  }
+  return {name:String(a[0][1]||'Học kỳ').trim(),rl:num(a[0][3])??100,closed:false,courses};
+}
+function readXlsx(buf){
+  if(typeof XLSX==='undefined') return alert('Chưa tải được thư viện Excel. Vui lòng kiểm tra kết nối mạng.');
+  const wb=XLSX.read(buf,{type:'array'}),sems=[],info={};
+  wb.SheetNames.forEach(sn=>{
+    const a=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:''});
+    if(a[0]&&a[0][0]==='Học kỳ') return sems.push(parseSem(a));
+    a.forEach(r=>{const f=SVF.find(([k,l])=>l===String(r[0]).trim());if(f) info[f[0]]=String(r[1]).trim()});
+  });
+  if(!sems.length) return alert('Không tìm thấy bảng học kỳ nào trong file Excel này.');
+  if(!confirm('Nhập file sẽ thay thế toàn bộ dữ liệu hiện tại. Tiếp tục?')) return;
+  S=sems; Object.assign(SV,info); save(); saveSV(); renderSV(); render();
+}
+
+document.addEventListener('input',e=>{
+  const el=e.target,d=el.dataset;
+  if(el.id==='q') return applyFilter();
+  if(el.id==='mText') return refresh();
+  if(d.sv){SV[d.sv]=el.value;return saveSV()}
+  if(d.m){setField(D[+d.i],d.m,el);return refresh()}
+  if(d.sf){S[+el.closest('.sem').dataset.si][d.sf]=d.sf==='name'?el.value:num(el.value);return recalc()}
+  if(d.f){const tr=el.closest('tr');setField(S[+tr.dataset.si].courses[+tr.dataset.ci],d.f,el);applyFilter();recalc()}
+});
+document.addEventListener('keydown',e=>{
+  const el=e.target,d=el.dataset;
+  if(e.key==='Escape'&&!$('#modal').hidden) return closeM();
+  if(e.key!=='Enter'||!(d.f||d.m)) return;
+  e.preventDefault();
+  if(d.m){
+    const i=+d.i;
+    if(i===D.length-1){D.push(blank());renderRows()}
+    return focusM(i+1,d.m);
+  }
+  const tr=el.closest('tr'),si=+tr.dataset.si,ci=+tr.dataset.ci;
+  if(ci===S[si].courses.length-1){S[si].courses.push(blank());render()}
+  focusCell(si,ci+1,d.f);
+});
+document.addEventListener('click',e=>{
+  if(e.target.id==='modal') return closeM();
+  const b=e.target.closest('button');
+  if(!b) return;
+  if(b.dataset.mode){MODE=b.dataset.mode;return setMode()}
+  const a=b.dataset.act;
+  if(!a) return;
+  const si=+b.dataset.si,ci=+b.dataset.ci,i=+b.dataset.i;
+  if(a==='openM') return openM();
+  if(a==='closeM') return closeM();
+  if(a==='mkSem') return mkSem();
+  if(a==='addRow'){D.push(blank());renderRows();return focusM(D.length-1,'code')}
+  if(a==='rmRow'){D.splice(i,1);return renderRows()}
+  if(a==='toggle'){S[si].closed=!S[si].closed;return render()}
+  if(a==='delSem'){if(confirm(`Xóa "${S[si].name}" và toàn bộ điểm trong học kỳ này?`)){S.splice(si,1);render()}return}
+  if(a==='addC'){S[si].courses.push(blank());render();return focusCell(si,S[si].courses.length-1,'code')}
+  if(a==='delC'){S[si].courses.splice(ci,1);return render()}
+  if(a==='sample'){if(confirm('Thay toàn bộ dữ liệu hiện tại bằng dữ liệu mẫu?')){S=structuredClone(SAMPLE);render()}return}
+  if(a==='exp') return exp();
+  if(a==='imp') return $('#file').click();
+});
+document.addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  if(e.target.id!=='file'||!f) return;
+  const r=new FileReader();
+  r.onload=()=>{try{readXlsx(r.result)}catch(x){alert('File Excel không hợp lệ hoặc không đúng định dạng.')}};
+  r.readAsArrayBuffer(f); e.target.value='';
+});
+
+renderSV();
+render();
+</script>
+</body>
+</html>
